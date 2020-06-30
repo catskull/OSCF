@@ -24,6 +24,9 @@
 #define D6 A2
 #define D7 A3
 
+#define DUMPSTART 'G'
+#define DUMPEND   'H'
+
 #include <Arduino.h>
 
 byte inPins[] = {D0, D1, D2, D3, D4, D5, D6, D7}; // 8 pins for data lines
@@ -124,7 +127,7 @@ int count = 0;
 void loop() {
   if (Serial && Serial.available()) {
     int byte = Serial.read();
-    if (byte == 'H') {
+    if (byte == DUMPSTART) {
       command = true;
     }
   }
@@ -141,13 +144,13 @@ void loop() {
     digitalWrite(RD, LOW);
     digitalWrite(CS, HIGH);
     delay(10);
+    Serial.print(DUMPSTART);
     for (int n = 0; n < 100; n++) {
       shiftOut(n);
       delay(10);
-      // readIn();
       printHex(readIn(), 2);
     }
-    Serial.flush();
+    Serial.print(DUMPEND);
   } else {
     count += 1;
     if (count > 50) {
