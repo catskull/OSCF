@@ -31,6 +31,7 @@
 
   document.addEventListener('DOMContentLoaded', event => {
     let connectButton = document.querySelector('#connect');
+    let dumpButton = document.querySelector('#dump');
 
     t.decorate(document.querySelector('#terminal'));
     t.setWidth(80);
@@ -43,6 +44,7 @@
         console.log(port);
         t.io.println('Connected.');
         connectButton.textContent = 'Disconnect';
+        dumpButton.disabled = false;
         port.onReceive = data => {
           let textDecoder = new TextDecoder();
           t.io.print(textDecoder.decode(data));
@@ -59,6 +61,7 @@
       if (port) {
         port.disconnect();
         connectButton.textContent = 'Connect';
+        dumpButton.disabled = true;
         port = null;
       } else {
         serial.requestPort().then(selectedPort => {
@@ -68,6 +71,12 @@
           t.io.println('Connection error: ' + error);
         });
       }
+    });
+
+    dumpButton.addEventListener('click', function() {
+      port.send(textEncoder.encode('H')).catch(error => {
+        t.io.println('Send error: ' + error);
+      });
     });
 
     serial.getPorts().then(ports => {
