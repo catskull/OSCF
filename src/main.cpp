@@ -116,18 +116,32 @@ void setup() {
   digitalWrite(RST, HIGH);
 }
 
+bool flag = false;
+int count = 0;
+
 void loop() {
-  digitalWrite(RST, LOW);
-  delay(100);
-  digitalWrite(RST, HIGH);
-  digitalWrite(RD, LOW);
-  digitalWrite(CS, HIGH);
-  delay(10);
-  for (int n = 0; n < 1000; n++) {
-    shiftOut(n);
+  if (!digitalRead(DUMP) && flag) {
+    flag = true;
+    count = 0;
+    digitalWrite(RST, LOW);
+    delay(100);
+    digitalWrite(WR, LOW);
+
+    digitalWrite(RST, HIGH);
+    digitalWrite(RD, LOW);
+    digitalWrite(CS, HIGH);
     delay(10);
-    // readIn();
-    printHex(readIn(), 2);
+    for (int n = 0; n < 100; n++) {
+      shiftOut(n);
+      delay(10);
+      // readIn();
+      printHex(readIn(), 2);
+    }
+  } else {
+    count += 1;
+    if (count > 50) {
+      flag = true;
+      count = 0;
+    }
   }
-  while(true);
 }
