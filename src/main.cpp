@@ -79,19 +79,6 @@ void shiftOut(short myDataOut) {
   digitalWrite(ST_CP, HIGH);
 }
 
-// taken from https://forum.arduino.cc/index.php?topic=38107.msg282336#msg282336
-// because Serial.print(val, HEX) doesn't pad with 0
-// just for test, won't be used in the real thing
-void printHex(int num, int precision) {
-     char tmp[16];
-     char format[128];
-
-     sprintf(format, "%%.%dX", precision);
-
-     sprintf(tmp, format, num);
-     Serial.print(tmp);
-}
-
 void setup() {
   Serial.begin(9600);
   pinMode(WR, OUTPUT);
@@ -148,7 +135,7 @@ void loop() {
     for (int n = 0; n < 100; n++) {
       shiftOut(n);
       delay(10);
-      printHex(readIn(), 2);
+      Serial.print(readIn());
     }
     Serial.print(DUMPEND);
   } else {
