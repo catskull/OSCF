@@ -42,7 +42,6 @@
       t.io.println('Connecting to ' + port.device_.productName + '...');
       port.connect().then(() => {
         console.log(port);
-        t.io.println('Connected.');
         connectButton.textContent = 'Disconnect';
         dumpButton.disabled = false;
         port.onReceive = data => {
