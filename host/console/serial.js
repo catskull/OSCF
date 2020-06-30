@@ -39,7 +39,6 @@ var serial = {};
 
     return this.device_.open()
         .then(() => {
-          debugger;
           if (this.device_.configuration === null) {
             return this.device_.selectConfiguration(1);
           }
@@ -49,7 +48,6 @@ var serial = {};
           configurationInterfaces.forEach(element => {
             element.alternates.forEach(elementalt => {
               if (elementalt.interfaceClass==0xff) {
-                debugger;
                 this.interfaceNumber_ = element.interfaceNumber;
                 elementalt.endpoints.forEach(elementendpoint => {
                   if (elementendpoint.direction === "out" && elementendpoint.type === "bulk") {
