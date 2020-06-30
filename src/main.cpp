@@ -114,14 +114,24 @@ void setup() {
   digitalWrite(RD, HIGH);
   digitalWrite(CS, HIGH);
   digitalWrite(RST, HIGH);
+  Serial.println("Connected to OSCF v0.0.1\r\n");
 }
 
 bool flag = false;
+bool command;
 int count = 0;
 
 void loop() {
-  if (!digitalRead(DUMP) && flag) {
-    flag = true;
+  if (Serial && Serial.available()) {
+    int byte = Serial.read();
+    if (byte == 'H') {
+      command = true;
+    }
+  }
+
+  if ((!digitalRead(DUMP) && flag) || command) {
+    flag = false;
+    command = false;
     count = 0;
     digitalWrite(RST, LOW);
     delay(100);
@@ -137,6 +147,7 @@ void loop() {
       // readIn();
       printHex(readIn(), 2);
     }
+    Serial.flush();
   } else {
     count += 1;
     if (count > 50) {
