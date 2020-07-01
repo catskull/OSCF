@@ -106,9 +106,6 @@ export default {
         })
       }
     },
-    stringIsHex (text) {
-      return text.match(/^[A-Fa-f0-9]{2}$/i) !== null
-    },
     decodeAndApplyAction (action) {
       switch (action) {
         case constants.READSTART.value: // read start
