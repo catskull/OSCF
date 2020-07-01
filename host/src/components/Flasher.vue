@@ -77,8 +77,8 @@ export default {
       this.dumpText = ''
       this.dumpButtonDisabled = true
       this.port.send(this.textEncoder.encode(constants.READSTART.value))
-        .then(this.port.send(new Uint8Array([10])))
-        .then(this.port.send(new Uint8Array([10])))
+        .then(this.port.send(260))
+        .then(this.port.send(10))
         .catch(error => {
           console.log('Send error: ' + error)
         })
