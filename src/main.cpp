@@ -157,7 +157,7 @@ void loop() {
     Serial.print(READSTART);
     for (unsigned int n = readLocation; n < (readLocation + readBytes); n++) {
       shiftOut(n);
-      delay(10);
+      // delay(10);
       printHex(readIn(), 2);
     }
     Serial.print(READEND);
