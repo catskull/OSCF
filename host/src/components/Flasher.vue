@@ -10,7 +10,7 @@
     <b-button
       id="read"
       :disabled="readButtonDisabled"
-      @click="read"
+      @click="read(0x0134, 24)"
     >
       Read Header
     </b-button>
