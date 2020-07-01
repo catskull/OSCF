@@ -3,6 +3,9 @@ var serial = {};
 (function () {
   'use strict'
 
+  const textEncoder = new TextEncoder()
+  const textDecoder = new TextDecoder()
+
   serial.getPorts = function () {
     return navigator.usb.getDevices().then(devices => {
       return devices.map(device => new serial.Port(device))
@@ -28,8 +31,7 @@ var serial = {};
   serial.Port.prototype.connect = function () {
     const readLoop = () => {
       this.device_.transferIn(this.endpointIn_, 32).then(result => {
-        // console.log(result.data);
-        this.onReceive(result.data)
+        this.onReceive(textDecoder.decode(result.data))
         readLoop()
       }, error => {
         console.log(error)
@@ -88,7 +90,13 @@ var serial = {};
   }
 
   serial.Port.prototype.send = function (data) {
-    return this.device_.transferOut(this.endpointOut_, data)
+    var payload
+    if (typeof data === 'string') {
+      payload = textEncoder.encode(data)
+    } else {
+      payload = new Uint8Array([data])
+    }
+    return this.device_.transferOut(this.endpointOut_, payload)
   }
 })()
 

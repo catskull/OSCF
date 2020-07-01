@@ -57,7 +57,7 @@ export default {
         this.port.onReceive = data => {
           // read serial input and split into 2 character chunks
           // normally input is already in chunks, but for some reason the last 2 bytes get combined
-          const decoded = this.textDecoder.decode(data).match(/[a-z]+|[^a-z]+/gi)
+          const decoded = data.match(/[a-z]+|[^a-z]+/gi)
           decoded.forEach((string) => {
             if (/[G-X]/gm.test(string)) {
               this.decodeAndApplyAction(string)
