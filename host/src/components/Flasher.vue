@@ -14,15 +14,21 @@
     >
       Read Header
     </b-button>
-    <p style="word-break: break-word;">
-      {{ readText }}
-    </p>
+    <div style="text-align: left; margin-left: 37%;">
+      <p
+        v-for="(value, name) in header"
+        :key="name"
+      >
+        {{ name }}: {{ value }}
+      </p>
+    </div>
   </div>
 </template>
 
 <script>
 import serial from '../serial.js'
 import constants from '../Constants.js'
+import gameboyHeader from '../gameboyHeader.js'
 
 export default {
   name: 'Flasher',
@@ -35,7 +41,8 @@ export default {
       readButtonDisabled: true,
       textDecoder: new TextDecoder(),
       textEncoder: new TextEncoder(),
-      readText: ''
+      readText: '',
+      header: {}
     }
   },
   created () {
@@ -109,6 +116,7 @@ export default {
           break
         case constants.READEND.value: // read completed
           this.readButtonDisabled = false
+          this.header = gameboyHeader(this.readText)
           break
         default:
           console.log('Unknown action recieved: ', action)
