@@ -70,7 +70,6 @@ export default {
         this.connected = true
         this.readButtonDisabled = false
         this.port.onReceive = data => {
-          const decoded = data.match(/[a-z]+|[^a-z]+/gi)
           const decoded = data.match(/[g-z]+|[^g-z]+/gi)
           decoded.forEach((string) => {
             if (/[G-X]/gm.test(string)) {
