@@ -94,7 +94,7 @@ var serial = {};
     if (typeof data === 'string') {
       payload = textEncoder.encode(data)
     } else {
-      payload = new Uint8Array([data])
+      payload = new Uint16Array([data])
     }
     return this.device_.transferOut(this.endpointOut_, payload)
   }

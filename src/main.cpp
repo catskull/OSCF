@@ -110,17 +110,23 @@ void setup() {
 bool flag = false;
 bool command;
 int count = 0;
-int readLocation = 0;
-int readBytes = 0;
+unsigned int readLocation = 0;
+unsigned int readBytes = 0;
 
 void loop() {
   if (Serial && Serial.available()) {
-    int byte = Serial.read();
-    if (byte == READSTART) {
-      while(!Serial.available()){}
-      readLocation = Serial.read();
-      while(!Serial.available()){}
-      readBytes = Serial.read();
+    while(Serial.available() < 2){}
+    int byte1 = Serial.read();;
+    int byte2 = Serial.read();;
+    if (byte1 == READSTART) {
+      while(Serial.available() < 2){}
+      byte1 = Serial.read();
+      byte2 = Serial.read();
+      readLocation = byte2 * 256 + byte1;
+      while(Serial.available() < 2){}
+      byte1 = Serial.read();
+      byte2 = Serial.read();
+      readBytes = byte2 * 256 + byte1;
       command = true;
     }
   }
@@ -138,7 +144,7 @@ void loop() {
     digitalWrite(CS, HIGH);
     delay(10);
     Serial.print(READSTART);
-    for (int n = readLocation; n < (readLocation + readBytes); n++) {
+    for (unsigned int n = readLocation; n < (readLocation + readBytes); n++) {
       shiftOut(n);
       delay(10);
       Serial.print(readIn());
