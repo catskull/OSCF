@@ -62,7 +62,7 @@ export default {
             if (/[G-X]/gm.test(string)) {
               this.decodeAndApplyAction(string)
             } else {
-              this.dumpText += parseInt(string).toString(16)
+              this.dumpText += parseInt(string).toString(16).padStart(2, '0')
             }
           })
         }
