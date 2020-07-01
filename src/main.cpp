@@ -110,11 +110,17 @@ void setup() {
 bool flag = false;
 bool command;
 int count = 0;
+int readLocation = 0;
+int readBytes = 0;
 
 void loop() {
   if (Serial && Serial.available()) {
     int byte = Serial.read();
-    if (byte == DUMPSTART) {
+    if (byte == READSTART) {
+      while(!Serial.available()){}
+      readLocation = Serial.read();
+      while(!Serial.available()){}
+      readBytes = Serial.read();
       command = true;
     }
   }
@@ -131,8 +137,8 @@ void loop() {
     digitalWrite(RD, LOW);
     digitalWrite(CS, HIGH);
     delay(10);
-    for (int n = 0; n < 100; n++) {
     Serial.print(READSTART);
+    for (int n = readLocation; n < (readLocation + readBytes); n++) {
       shiftOut(n);
       delay(10);
       Serial.print(readIn());
