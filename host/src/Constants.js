@@ -1,12 +1,12 @@
 export default {
-  DUMPSTART: {
-    key: 'DUMPSTART',
+  READSTART: {
+    key: 'READSTART',
     value: 'G',
-    description: 'Indicates dumping has started.'
+    description: 'Indicates reading has started.'
   },
-  DUMPEND: {
-    key: 'DUMPEND',
+  READEND: {
+    key: 'READEND',
     value: 'H',
-    description: 'Indicates dumping has finished.'
+    description: 'Indicates reading has finished.'
   }
 }

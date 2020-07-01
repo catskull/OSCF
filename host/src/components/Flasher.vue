@@ -76,9 +76,9 @@ export default {
     dump () {
       this.dumpText = ''
       this.dumpButtonDisabled = true
-      this.port.send(this.textEncoder.encode(constants.DUMPSTART.value))
         .then(() => {
         })
+      this.port.send(this.textEncoder.encode(constants.READSTART.value))
         .catch(error => {
           console.log('Send error: ' + error)
         })
@@ -103,10 +103,10 @@ export default {
     },
     decodeAndApplyAction (action) {
       switch (action) {
-        case constants.DUMPSTART.value: // dump start
+        case constants.READSTART.value: // read start
           this.dumpText = ''
           break
-        case constants.DUMPEND.value: // dump completed
+        case constants.READEND.value: // read completed
           this.dumpButtonDisabled = false
           break
         default:

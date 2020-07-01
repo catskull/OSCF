@@ -24,8 +24,8 @@
 #define D6 A2
 #define D7 A3
 
-#define DUMPSTART 'G'
-#define DUMPEND   'H'
+#define READSTART 'G'
+#define READEND   'H'
 
 #include <Arduino.h>
 
@@ -131,13 +131,13 @@ void loop() {
     digitalWrite(RD, LOW);
     digitalWrite(CS, HIGH);
     delay(10);
-    Serial.print(DUMPSTART);
     for (int n = 0; n < 100; n++) {
+    Serial.print(READSTART);
       shiftOut(n);
       delay(10);
       Serial.print(readIn());
     }
-    Serial.print(DUMPEND);
+    Serial.print(READEND);
   } else {
     count += 1;
     if (count > 50) {
