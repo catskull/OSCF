@@ -74,12 +74,12 @@ export default {
         console.log('Connection error: ' + error)
       })
     },
-    read () {
+    read (address, length) {
       this.readText = ''
       this.readButtonDisabled = true
       this.port.send(this.textEncoder.encode(constants.READSTART.value))
-        .then(this.port.send(260))
-        .then(this.port.send(10))
+        .then(this.port.send(address))
+        .then(this.port.send(length))
         .catch(error => {
           console.log('Send error: ' + error)
         })
