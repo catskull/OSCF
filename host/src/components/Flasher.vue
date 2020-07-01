@@ -52,7 +52,6 @@ export default {
     connect () {
       // t.io.println('Connecting to ' + this.port.device_.productName + '...');
       this.port.connect().then(() => {
-        console.log(this.port)
         this.connected = true
         this.dumpButtonDisabled = false
         this.port.onReceive = data => {
