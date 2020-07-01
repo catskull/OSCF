@@ -1,18 +1,19 @@
 <template>
   <div class="flasher">
-    <button
+    <b-button
       id="connect"
+      :type="connected ? 'is-warning' : 'is-primary'"
       @click="clickConnect"
     >
-      {{ connectButtonText }}
-    </button>
-    <button
+      {{ connected ? 'Disconnect' : 'Connect' }}
+    </b-button>
+    <b-button
       id="dump"
       :disabled="dumpButtonDisabled"
       @click="dump"
     >
       Dump
-    </button>
+    </b-button>
     <p style="word-break: break-word;">
       {{ dumpText }}
     </p>
@@ -30,7 +31,7 @@ export default {
   data () {
     return {
       port: undefined,
-      connectButtonText: 'Connect',
+      connected: false,
       dumpButtonDisabled: true,
       textDecoder: new TextDecoder(),
       textEncoder: new TextEncoder(),
@@ -52,7 +53,7 @@ export default {
       // t.io.println('Connecting to ' + this.port.device_.productName + '...');
       this.port.connect().then(() => {
         console.log(this.port)
-        this.connectButtonText = 'Disconnect'
+        this.connected = true
         this.dumpButtonDisabled = false
         this.port.onReceive = data => {
           // read serial input and split into 2 character chunks
@@ -86,7 +87,7 @@ export default {
     clickConnect () {
       if (this.port) {
         this.port.disconnect()
-        this.connectButtonText = 'Connect'
+        this.connected = false
         this.dumpButtonDisabled = true
         this.port = null
       } else {
