@@ -8,14 +8,14 @@
       {{ connected ? 'Disconnect' : 'Connect' }}
     </b-button>
     <b-button
-      id="dump"
-      :disabled="dumpButtonDisabled"
-      @click="dump"
+      id="read"
+      :disabled="readButtonDisabled"
+      @click="read"
     >
-      Dump
+      Read Header
     </b-button>
     <p style="word-break: break-word;">
-      {{ dumpText }}
+      {{ readText }}
     </p>
   </div>
 </template>
@@ -32,10 +32,10 @@ export default {
     return {
       port: undefined,
       connected: false,
-      dumpButtonDisabled: true,
+      readButtonDisabled: true,
       textDecoder: new TextDecoder(),
       textEncoder: new TextEncoder(),
-      dumpText: ''
+      readText: ''
     }
   },
   created () {
@@ -53,7 +53,7 @@ export default {
       // t.io.println('Connecting to ' + this.port.device_.productName + '...');
       this.port.connect().then(() => {
         this.connected = true
-        this.dumpButtonDisabled = false
+        this.readButtonDisabled = false
         this.port.onReceive = data => {
           // read serial input and split into 2 character chunks
           // normally input is already in chunks, but for some reason the last 2 bytes get combined
@@ -62,8 +62,8 @@ export default {
             if (/[G-X]/gm.test(string)) {
               this.decodeAndApplyAction(string)
             } else {
-              this.dumpText += parseInt(string).toString(16).padStart(2, '0').toUpperCase()
-              this.dumpText += ' '
+              this.readText += parseInt(string).toString(16).padStart(2, '0').toUpperCase()
+              this.readText += ' '
             }
           })
         }
@@ -74,9 +74,9 @@ export default {
         console.log('Connection error: ' + error)
       })
     },
-    dump () {
-      this.dumpText = ''
-      this.dumpButtonDisabled = true
+    read () {
+      this.readText = ''
+      this.readButtonDisabled = true
       this.port.send(this.textEncoder.encode(constants.READSTART.value))
         .then(this.port.send(260))
         .then(this.port.send(10))
@@ -88,7 +88,7 @@ export default {
       if (this.port) {
         this.port.disconnect()
         this.connected = false
-        this.dumpButtonDisabled = true
+        this.readButtonDisabled = true
         this.port = null
       } else {
         serial.requestPort().then(selectedPort => {
@@ -105,10 +105,10 @@ export default {
     decodeAndApplyAction (action) {
       switch (action) {
         case constants.READSTART.value: // read start
-          this.dumpText = ''
+          this.readText = ''
           break
         case constants.READEND.value: // read completed
-          this.dumpButtonDisabled = false
+          this.readButtonDisabled = false
           break
         default:
           console.log('Unknown action recieved: ', action)
