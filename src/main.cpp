@@ -79,6 +79,17 @@ void shiftOut(short myDataOut) {
   digitalWrite(ST_CP, HIGH);
 }
 
+  void printHex(int num, int precision) {
+    char tmp[16];
+    char format[128];
+
+    sprintf(format, "%%.%dX", precision);
+
+    sprintf(tmp, format, num);
+    Serial.print(tmp);
+  }
+
+
 void setup() {
   Serial.begin(9600);
   pinMode(WR, OUTPUT);
@@ -147,7 +158,7 @@ void loop() {
     for (unsigned int n = readLocation; n < (readLocation + readBytes); n++) {
       shiftOut(n);
       delay(10);
-      Serial.print(readIn());
+      printHex(readIn(), 2);
     }
     Serial.print(READEND);
   } else {

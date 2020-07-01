@@ -8,11 +8,17 @@
       {{ connected ? 'Disconnect' : 'Connect' }}
     </b-button>
     <b-button
-      id="read"
       :disabled="readButtonDisabled"
-      @click="read(0x0134, 24)"
+      @click="readAndParseHeader"
     >
       Read Header
+    </b-button>
+    <b-button
+      id="read"
+      :disabled="readButtonDisabled"
+      @click="dumpRom"
+    >
+      Dump ROM
     </b-button>
     <div style="text-align: left; margin-left: 37%;">
       <p
@@ -42,7 +48,9 @@ export default {
       textDecoder: new TextDecoder(),
       textEncoder: new TextEncoder(),
       readText: '',
-      header: {}
+      header: {},
+      readingSource: '',
+      databuffer: ''
     }
   },
   created () {
@@ -62,15 +70,13 @@ export default {
         this.connected = true
         this.readButtonDisabled = false
         this.port.onReceive = data => {
-          // read serial input and split into 2 character chunks
-          // normally input is already in chunks, but for some reason the last 2 bytes get combined
           const decoded = data.match(/[a-z]+|[^a-z]+/gi)
+          const decoded = data.match(/[g-z]+|[^g-z]+/gi)
           decoded.forEach((string) => {
             if (/[G-X]/gm.test(string)) {
               this.decodeAndApplyAction(string)
             } else {
-              this.readText += parseInt(string).toString(16).padStart(2, '0').toUpperCase()
-              this.readText += ' '
+              this.readText += string.toUpperCase()
             }
           })
         }
@@ -113,12 +119,70 @@ export default {
           break
         case constants.READEND.value: // read completed
           this.readButtonDisabled = false
-          this.header = gameboyHeader(this.readText)
+          if (this.readingSource === 'header') {
+            this.readText = this.readText.match(/.{1,2}/g).join(' ')
+            this.header = gameboyHeader(this.readText)
+          } else if (this.readingSource === 'rom') {
+            console.log('rom dumped')
+            console.log(this.readText.split(' ').length)
+          }
           break
         default:
           console.log('Unknown action recieved: ', action)
           break
       }
+    },
+    readAndParseHeader () {
+      this.readingSource = 'header'
+      this.read(0x0134, 24)
+    },
+    async dumpRom () {
+      this.readAndParseHeader()
+      while (Object.keys(this.header).length === 0 && this.header.constructor === Object) {
+        await new Promise(resolve => setTimeout(resolve, 1000))
+      }
+      let size = 0
+      switch (this.header.romSize) {
+        case '32 KByte':
+          size = 32 * 1000
+          break
+        case '64 KByte':
+          size = 64 * 1000
+          break
+        case '128 KByte':
+          size = 128 * 1000
+          break
+        case '256 KByte':
+          size = 256 * 1000
+          break
+        case '512 KByte':
+          size = 512 * 1000
+          break
+        case '1 MByte':
+          size = 1000 * 1000
+          break
+        case '2 MByte':
+          size = 2000 * 1000
+          break
+        case '4 MByte':
+          size = 4000 * 1000
+          break
+        case '8 MByte':
+          size = 8000 * 1000
+          break
+        case '1.1 MByte':
+          size = 1.1 * 1000
+          break
+        case '1.2 MByte':
+          size = 1.2 * 1000
+          break
+        case '1.5 MByte':
+          size = 1.5 * 1000
+          break
+      }
+      size = 32 * 1000
+      this.readingSource = 'rom'
+      this.read(0, size)
     }
   }
 }
