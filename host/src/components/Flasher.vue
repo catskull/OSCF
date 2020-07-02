@@ -145,6 +145,7 @@ export default {
           } else if (this.readingSource === 'rom') {
             this.readProgres = this.readLength
             console.log(`Dumped ROM in ${(performance.now() - this.startTime) / 1000} seconds.`)
+            this.downloadRom()
           }
           break
         default:
@@ -207,6 +208,44 @@ export default {
       this.readLength = size
       this.readingSource = 'rom'
       this.read(0, size)
+    },
+    downloadRom () {
+      var byteArray = new Uint8Array(this.readText.length / 2)
+      for (var x = 0; x < byteArray.length; x++) {
+        byteArray[x] = parseInt(this.readText.substr(x * 2, 2), 16)
+      }
+
+      var data = new Blob([byteArray], {
+        type: 'application/octet-stream'
+      })
+
+      const textFile = window.URL.createObjectURL(data)
+
+      // create the download link, then download it, then destroy it
+      var a = document.createElement('a')
+      var clickEvent = new MouseEvent('click', {
+        view: window,
+        bubbles: true,
+        cancelable: false
+      })
+      a.style = 'display: none'
+      a.href = textFile
+      // check the cgb box to see if the rom should have .gb or .gbc extension
+      var name = this.header.title.trim()
+      // make sure there is a name
+      if (name === '') {
+        name = 'logo'
+      }
+      // if (document.getElementById('cgbSupportSelect').value == '00') {
+      a.download = name + '.gb'
+      // } else {
+      //   a.download = name + '.gbc'
+      // }
+      a.dispatchEvent(clickEvent)
+      setTimeout(function () {
+        // document.body.removeChild(a);
+        window.URL.revokeObjectURL(textFile)
+      }, 100)
     }
   }
 }
