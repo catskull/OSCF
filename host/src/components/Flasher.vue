@@ -20,6 +20,11 @@
     >
       Dump ROM
     </b-button>
+    <b-progress
+      :value="readProgres"
+      :max="readLength"
+      :show-value="true"
+    />
     <div style="text-align: left; margin-left: 37%;">
       <p
         v-for="(value, name) in header"
@@ -49,7 +54,9 @@ export default {
       readText: '',
       header: {},
       readingSource: '',
-      startTime: undefined
+      startTime: undefined,
+      readLength: 0,
+      readProgres: 0
     }
   },
   created () {
@@ -74,6 +81,9 @@ export default {
               this.decodeAndApplyAction(string)
             } else {
               this.readText += string.toUpperCase()
+              if (Math.round(this.readText.length / 2) - this.readProgres > 100) {
+                this.readProgres = Math.round(this.readText.length / 2)
+              }
             }
           })
         }
@@ -121,6 +131,7 @@ export default {
             this.readText = this.readText.match(/.{1,2}/g).join(' ')
             this.header = gameboyHeader(this.readText)
           } else if (this.readingSource === 'rom') {
+            console.log(this.readText.length)
             console.log(`Dumped ROM in ${(performance.now() - this.startTime) / 1000} seconds.`)
           }
           break
@@ -134,11 +145,13 @@ export default {
       this.read(0x0134, 24)
     },
     async dumpRom () {
+      this.header = {}
       this.startTime = performance.now()
       this.readAndParseHeader()
       while (Object.keys(this.header).length === 0 && this.header.constructor === Object) {
-        await new Promise(resolve => setTimeout(resolve, 1000))
+        await new Promise(resolve => setTimeout(resolve, 10))
       }
+      this.readProgres = 0
       let size = 0
       switch (this.header.romSize) {
         case '32 KByte':
@@ -179,6 +192,7 @@ export default {
           break
       }
       size = 32 * 1000
+      this.readLength = size
       this.readingSource = 'rom'
       this.read(0, size)
     }
