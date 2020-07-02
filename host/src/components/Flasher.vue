@@ -65,7 +65,6 @@ export default {
   },
   methods: {
     connect () {
-      // t.io.println('Connecting to ' + this.port.device_.productName + '...');
       this.port.connect().then(() => {
         this.connected = true
         this.readButtonDisabled = false
