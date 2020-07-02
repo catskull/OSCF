@@ -1,30 +1,42 @@
 <template>
   <div class="flasher">
-    <b-button
-      id="connect"
-      :type="connected ? 'is-warning' : 'is-primary'"
-      @click="clickConnect"
-    >
-      {{ connected ? 'Disconnect' : 'Connect' }}
-    </b-button>
-    <b-button
-      :disabled="readButtonDisabled"
-      @click="readAndParseHeader"
-    >
-      Read Header
-    </b-button>
-    <b-button
-      id="read"
-      :disabled="readButtonDisabled"
-      @click="dumpRom"
-    >
-      Dump ROM
-    </b-button>
-    <b-progress
-      :value="readProgres"
-      :max="readLength"
-      :show-value="true"
-    />
+    <div class="columns is-mobile is-centered">
+      <div class="column">
+        <b-button
+          id="connect"
+          :type="connected ? 'is-warning' : 'is-primary'"
+          @click="clickConnect"
+        >
+          {{ connected ? 'Disconnect' : 'Connect' }}
+        </b-button>
+      </div>
+      <div class="column">
+        <b-button
+          :disabled="readButtonDisabled"
+          @click="readAndParseHeader"
+        >
+          Read Header
+        </b-button>
+      </div>
+      <div class="column">
+        <b-button
+          id="read"
+          :disabled="readButtonDisabled"
+          @click="dumpRom"
+        >
+          Dump ROM
+        </b-button>
+      </div>
+    </div>
+    <div class="columns is-mobile is-centered">
+      <div class="column is-half">
+        <b-progress
+          :value="readProgres"
+          :max="readLength"
+        />
+      </div>
+    </div>
+
     <div style="text-align: left; margin-left: 37%;">
       <p
         v-for="(value, name) in header"
