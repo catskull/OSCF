@@ -45,12 +45,10 @@ export default {
       port: undefined,
       connected: false,
       readButtonDisabled: true,
-      textDecoder: new TextDecoder(),
       textEncoder: new TextEncoder(),
       readText: '',
       header: {},
-      readingSource: '',
-      databuffer: ''
+      readingSource: ''
     }
   },
   created () {
