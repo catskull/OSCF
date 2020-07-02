@@ -28,6 +28,7 @@
 #define READEND   'H'
 
 #include <Arduino.h>
+#include <digitalWriteFast.h>
 
 byte inPins[] = {D0, D1, D2, D3, D4, D5, D6, D7}; // 8 pins for data lines
 
@@ -42,7 +43,7 @@ byte readIn(){
     if (i == 2 || i == 3) {
       value = map(analogRead(inPins[i]), 0, 1023, 0, 1);
     } else {
-      value = digitalRead(inPins[i]);
+      value = digitalReadFast(inPins[i]);
     }
     if(value == HIGH) input |= mask;
     mask = mask << 1;
@@ -56,12 +57,12 @@ void shiftOut(short myDataOut) {
   int i=0;
   int pinState;
 
-  digitalWrite(ST_CP, LOW);
-  digitalWrite(DS, LOW);
-  digitalWrite(SH_CP, LOW);
+  digitalWriteFast(ST_CP, LOW);
+  digitalWriteFast(DS, LOW);
+  digitalWriteFast(SH_CP, LOW);
 
   for (i=0; i<=15; i++)  {
-    digitalWrite(SH_CP, 0);
+    digitalWriteFast(SH_CP, 0);
 
     if ( myDataOut & (1<<i) ) {
       pinState= 1;
@@ -70,13 +71,13 @@ void shiftOut(short myDataOut) {
       pinState= 0;
     }
 
-    digitalWrite(DS, pinState);
-    digitalWrite(SH_CP, 1);
-    digitalWrite(DS, 0);
+    digitalWriteFast(DS, pinState);
+    digitalWriteFast(SH_CP, 1);
+    digitalWriteFast(DS, 0);
   }
 
-  digitalWrite(SH_CP, 0);
-  digitalWrite(ST_CP, HIGH);
+  digitalWriteFast(SH_CP, 0);
+  digitalWriteFast(ST_CP, HIGH);
 }
 
   void printHex(int num, int precision) {
@@ -92,29 +93,29 @@ void shiftOut(short myDataOut) {
 
 void setup() {
   Serial.begin(115200);
-  pinMode(WR, OUTPUT);
-  pinMode(RD, OUTPUT);
-  pinMode(CS, OUTPUT);
-  pinMode(RST, OUTPUT);
-  pinMode(SND, OUTPUT);
-  pinMode(DUMP, INPUT_PULLUP);
-  pinMode(AUTO, INPUT_PULLUP);
-  pinMode(ST_CP, OUTPUT);
-  pinMode(DS, OUTPUT);
-  pinMode(SH_CP, OUTPUT);
-  pinMode(D0, INPUT);
-  pinMode(D1, INPUT);
-  pinMode(D2, INPUT);
-  pinMode(D3, INPUT);
-  pinMode(D4, INPUT);
-  pinMode(D5, INPUT);
-  pinMode(D6, INPUT);
-  pinMode(D7, INPUT);
+  pinModeFast(WR, OUTPUT);
+  pinModeFast(RD, OUTPUT);
+  pinModeFast(CS, OUTPUT);
+  pinModeFast(RST, OUTPUT);
+  pinModeFast(SND, OUTPUT);
+  pinModeFast(DUMP, INPUT_PULLUP);
+  pinModeFast(AUTO, INPUT_PULLUP);
+  pinModeFast(ST_CP, OUTPUT);
+  pinModeFast(DS, OUTPUT);
+  pinModeFast(SH_CP, OUTPUT);
+  pinModeFast(D0, INPUT);
+  pinModeFast(D1, INPUT);
+  pinModeFast(D2, INPUT);
+  pinModeFast(D3, INPUT);
+  pinModeFast(D4, INPUT);
+  pinModeFast(D5, INPUT);
+  pinModeFast(D6, INPUT);
+  pinModeFast(D7, INPUT);
 
-  digitalWrite(WR, HIGH);
-  digitalWrite(RD, HIGH);
-  digitalWrite(CS, HIGH);
-  digitalWrite(RST, HIGH);
+  digitalWriteFast(WR, HIGH);
+  digitalWriteFast(RD, HIGH);
+  digitalWriteFast(CS, HIGH);
+  digitalWriteFast(RST, HIGH);
   Serial.println("Connected to OSCF v0.0.1\r\n");
 }
 
@@ -146,13 +147,13 @@ void loop() {
     flag = false;
     command = false;
     count = 0;
-    digitalWrite(RST, LOW);
+    digitalWriteFast(RST, LOW);
     delay(100);
-    digitalWrite(WR, LOW);
+    digitalWriteFast(WR, LOW);
 
-    digitalWrite(RST, HIGH);
-    digitalWrite(RD, LOW);
-    digitalWrite(CS, HIGH);
+    digitalWriteFast(RST, HIGH);
+    digitalWriteFast(RD, LOW);
+    digitalWriteFast(CS, HIGH);
     delay(10);
     Serial.print(READSTART);
     for (unsigned int n = readLocation; n < (readLocation + readBytes); n++) {
