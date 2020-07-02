@@ -48,7 +48,8 @@ export default {
       textEncoder: new TextEncoder(),
       readText: '',
       header: {},
-      readingSource: ''
+      readingSource: '',
+      startTime: undefined
     }
   },
   created () {
@@ -120,8 +121,7 @@ export default {
             this.readText = this.readText.match(/.{1,2}/g).join(' ')
             this.header = gameboyHeader(this.readText)
           } else if (this.readingSource === 'rom') {
-            console.log('rom dumped')
-            console.log(this.readText.split(' ').length)
+            console.log(`Dumped ROM in ${(performance.now() - this.startTime) / 1000} seconds.`)
           }
           break
         default:
@@ -134,6 +134,7 @@ export default {
       this.read(0x0134, 24)
     },
     async dumpRom () {
+      this.startTime = performance.now()
       this.readAndParseHeader()
       while (Object.keys(this.header).length === 0 && this.header.constructor === Object) {
         await new Promise(resolve => setTimeout(resolve, 1000))
