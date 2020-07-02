@@ -143,7 +143,7 @@ void loop() {
     }
   }
 
-  if ((!digitalRead(DUMP) && flag) || command) {
+  if (command) {
     flag = false;
     command = false;
     count = 0;
@@ -155,17 +155,17 @@ void loop() {
     digitalWriteFast(RD, LOW);
     digitalWriteFast(CS, HIGH);
     delay(10);
-    Serial.print(READSTART);
+    // Serial.print(READSTART);
     for (unsigned int n = readLocation; n < (readLocation + readBytes); n++) {
       shiftOut(n);
       // delay(10);
       printHex(readIn(), 2);
     }
     Serial.print(READEND);
-  } else {
+  } else if (!digitalRead(DUMP)) {
     count += 1;
-    if (count > 50) {
-      flag = true;
+    if (count > 9000) {
+      Serial.print(READSTART);
       count = 0;
     }
   }

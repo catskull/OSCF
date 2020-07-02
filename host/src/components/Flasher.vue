@@ -135,7 +135,7 @@ export default {
     decodeAndApplyAction (action) {
       switch (action) {
         case constants.READSTART.value: // read start
-          this.readText = ''
+          this.dumpRom()
           break
         case constants.READEND.value: // read completed
           this.readButtonDisabled = false
