@@ -87,6 +87,7 @@ export default {
       })
     },
     read (address, length) {
+      console.log(`reading ${length} bytes starting at address ${address}`)
       this.readText = ''
       this.readButtonDisabled = true
       this.port.send(this.textEncoder.encode(constants.READSTART.value))
