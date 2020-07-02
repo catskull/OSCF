@@ -91,7 +91,7 @@ void shiftOut(short myDataOut) {
 
 
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(115200);
   pinMode(WR, OUTPUT);
   pinMode(RD, OUTPUT);
   pinMode(CS, OUTPUT);
