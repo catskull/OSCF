@@ -148,7 +148,7 @@ void loop() {
     command = false;
     count = 0;
     digitalWriteFast(RST, LOW);
-    delay(100);
+    delay(10);
     digitalWriteFast(WR, LOW);
 
     digitalWriteFast(RST, HIGH);
