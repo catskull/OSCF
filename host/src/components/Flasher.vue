@@ -143,7 +143,7 @@ export default {
             this.readText = this.readText.match(/.{1,2}/g).join(' ')
             this.header = gameboyHeader(this.readText)
           } else if (this.readingSource === 'rom') {
-            console.log(this.readText.length)
+            this.readProgres = this.readLength
             console.log(`Dumped ROM in ${(performance.now() - this.startTime) / 1000} seconds.`)
           }
           break
