@@ -31,7 +31,7 @@
     <div class="columns is-mobile is-centered">
       <div class="column is-half">
         <b-progress
-          :value="readProgres"
+          :value="readProgress"
           :max="readLength"
         />
       </div>
@@ -68,7 +68,7 @@ export default {
       readingSource: '',
       startTime: undefined,
       readLength: 0,
-      readProgres: 0
+      readProgress: 0
     }
   },
   created () {
@@ -93,8 +93,8 @@ export default {
               this.decodeAndApplyAction(string)
             } else {
               this.readText += string.toUpperCase()
-              if (Math.round(this.readText.length / 2) - this.readProgres > 100) {
-                this.readProgres = Math.round(this.readText.length / 2)
+              if (Math.round(this.readText.length / 2) - this.readProgress > 100) {
+                this.readProgress = Math.round(this.readText.length / 2)
               }
             }
           })
@@ -143,7 +143,7 @@ export default {
             this.readText = this.readText.match(/.{1,2}/g).join(' ')
             this.header = gameboyHeader(this.readText)
           } else if (this.readingSource === 'rom') {
-            this.readProgres = this.readLength
+            this.readProgress = this.readLength
             console.log(`Dumped ROM in ${(performance.now() - this.startTime) / 1000} seconds.`)
             this.downloadRom()
           }
@@ -164,7 +164,7 @@ export default {
       while (Object.keys(this.header).length === 0 && this.header.constructor === Object) {
         await new Promise(resolve => setTimeout(resolve, 10))
       }
-      this.readProgres = 0
+      this.readProgress = 0
       let size = 0
       switch (this.header.romSize) {
         case '32 KByte':
