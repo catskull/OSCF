@@ -16,9 +16,14 @@
 
 #include <Arduino.h>
 
-byte readData(){
+byte readData() {
   portMode(DATA, INPUT);
   return portRead(DATA);
+}
+
+void writeData(byte data) {
+  portMode(DATA, OUTPUT);
+  portWrite(DATA, data);
 }
 
 void writeAddress(short data) {
