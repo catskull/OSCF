@@ -16,12 +16,12 @@
 
 #include <Arduino.h>
 
-byte readIn(){
+byte readData(){
   portMode(DATA, INPUT);
   return portRead(DATA);
 }
 
-void writeOut(short data) {
+void writeAddress(short data) {
   portMode(ADDR1, OUTPUT);
   portMode(ADDR2, OUTPUT);
   portWrite(ADDR1, data & 0xFF);
@@ -95,8 +95,8 @@ void loop() {
     digitalWrite(CS, HIGH);
     delay(10);
     for (unsigned int n = readLocation; n < (readLocation + readBytes); n++) {
-      writeOut(n);
-      printHex(readIn(), 2);
+      writeAddress(n);
+      printHex(readData(), 2);
     }
     Serial.print(READEND);
   }
