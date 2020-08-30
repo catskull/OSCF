@@ -27,6 +27,15 @@
           Dump ROM
         </b-button>
       </div>
+      <div class="column">
+        <b-button
+          id="read"
+          :disabled="readButtonDisabled"
+          @click="dumpRam"
+        >
+          Dump RAM
+        </b-button>
+      </div>
     </div>
     <div class="columns is-mobile is-centered">
       <div class="column is-half">
@@ -68,10 +77,14 @@ export default {
       readingSource: '',
       startTime: undefined,
       readLength: 0,
-      readProgress: 0
+      readProgress: 0,
+      resolver: undefined,
+      promise: undefined
     }
   },
   created () {
+    this.resetPromise()
+
     serial.getPorts().then(ports => {
       if (ports.length === 0) {
         console.log('No devices found.')
@@ -82,6 +95,11 @@ export default {
     })
   },
   methods: {
+    resetPromise () {
+      this.promise = new Promise((resolve) => {
+        this.resolver = resolve
+      })
+    },
     connect () {
       this.port.connect().then(() => {
         this.connected = true
@@ -93,9 +111,10 @@ export default {
               this.decodeAndApplyAction(string)
             } else {
               this.readText += string.toUpperCase()
-              if (Math.round(this.readText.length / 2) - this.readProgress > 100) {
-                this.readProgress = Math.round(this.readText.length / 2)
-              }
+              // if (Math.round(this.readText.length / 2) - this.readProgress > 100) {
+              //   this.readProgress = Math.round(this.readText.length / 2)
+              // }
+              this.readProgress += Math.round(this.readText.length / 2)
             }
           })
         }
@@ -106,16 +125,25 @@ export default {
         console.log('Connection error: ' + error)
       })
     },
-    read (address, length) {
+    async read (address, length) {
       console.log(`reading ${length} bytes starting at address ${address}`)
       this.readText = ''
-      this.readButtonDisabled = true
-      this.port.send(this.textEncoder.encode(constants.READSTART.value))
-        .then(this.port.send(address))
-        .then(this.port.send(length))
-        .catch(error => {
-          console.log('Send error: ' + error)
-        })
+      try {
+        await this.port.send(this.textEncoder.encode(constants.READSTART.value))
+        await this.port.send(address)
+        await this.port.send(length)
+      } catch (error) {
+        console.log('Send error: ' + error)
+      }
+    },
+    async write (address, data) {
+      try {
+        await this.port.send(this.textEncoder.encode(constants.WRITESTART.value))
+        await this.port.send(address)
+        await this.port.send(data)
+      } catch (error) {
+        console.log('Send error: ' + error)
+      }
     },
     clickConnect () {
       if (this.port) {
@@ -135,84 +163,94 @@ export default {
     decodeAndApplyAction (action) {
       switch (action) {
         case constants.READSTART.value: // read start
-          this.dumpRom()
           break
         case constants.READEND.value: // read completed
-          this.readButtonDisabled = false
           if (this.readingSource === 'header') {
             this.readText = this.readText.match(/.{1,2}/g).join(' ')
             this.header = gameboyHeader(this.readText)
+            this.resolver()
           } else if (this.readingSource === 'rom') {
-            this.readProgress = this.readLength
-            console.log(`Dumped ROM in ${(performance.now() - this.startTime) / 1000} seconds.`)
-            this.downloadRom()
+            this.resolver()
+          } else if (this.readingSource === 'ram') {
+            this.resolver()
           }
+          break
+        case constants.WRITEEND.value: // write completed
+          this.resolver()
           break
         default:
           console.log('Unknown action recieved: ', action)
           break
       }
     },
-    readAndParseHeader () {
+    async readAndParseHeader () {
       this.readingSource = 'header'
       this.read(0x0134, 24)
+      await this.promise
+      this.resetPromise()
     },
     async dumpRom () {
+      this.readButtonDisabled = true
       this.header = {}
       this.startTime = performance.now()
       this.readAndParseHeader()
-      while (Object.keys(this.header).length === 0 && this.header.constructor === Object) {
-        await new Promise(resolve => setTimeout(resolve, 10))
-      }
+      await this.promise
+      this.resetPromise()
       this.readProgress = 0
-      let size = 0
-      switch (this.header.romSize) {
-        case '32 KByte':
-          size = 32 * 1000
-          break
-        case '64 KByte':
-          size = 64 * 1000
-          break
-        case '128 KByte':
-          size = 128 * 1000
-          break
-        case '256 KByte':
-          size = 256 * 1000
-          break
-        case '512 KByte':
-          size = 512 * 1000
-          break
-        case '1 MByte':
-          size = 1000 * 1000
-          break
-        case '2 MByte':
-          size = 2000 * 1000
-          break
-        case '4 MByte':
-          size = 4000 * 1000
-          break
-        case '8 MByte':
-          size = 8000 * 1000
-          break
-        case '1.1 MByte':
-          size = 1.1 * 1000
-          break
-        case '1.2 MByte':
-          size = 1.2 * 1000
-          break
-        case '1.5 MByte':
-          size = 1.5 * 1000
-          break
-      }
-      size = 32 * 1000
-      this.readLength = size
+      this.readLength = this.header.romSizeBytes
       this.readingSource = 'rom'
-      this.read(0, size)
+      this.read(0, 0x4000)
+      await this.promise
+      this.resetPromise()
+      let rom = this.readText
+      // this.readLength / 0x4000
+      for (let bank = 1; bank < this.readLength / 0x4000; bank++) {
+        this.write(0x2000, bank)
+        await this.promise
+        this.resetPromise()
+        this.read(0x4000, 0x4000)
+        await this.promise
+        this.resetPromise()
+        rom += this.readText
+      }
+      console.log(`Dumped ROM in ${(performance.now() - this.startTime) / 1000} seconds.`)
+      this.downloadRom(rom)
+      this.readButtonDisabled = false
     },
-    downloadRom () {
-      var byteArray = new Uint8Array(this.readText.length / 2)
+    async dumpRam () {
+      debugger
+      this.readButtonDisabled = true
+      this.header = {}
+      this.startTime = performance.now()
+      this.readAndParseHeader()
+      await this.promise
+      this.resetPromise()
+      this.readProgress = 0
+      this.readLength = 8000
+      this.readingSource = 'ram'
+      this.write(0x0000, 0x0A)
+      await this.promise
+      this.resetPromise()
+      this.write(0xA000, 0xF)
+      await this.promise
+      this.resetPromise()
+      this.write(0xBFFF, 0xF)
+      await this.promise
+      this.resetPromise()
+      this.read(0xA000, 8000)
+      await this.promise
+      this.resetPromise()
+      console.log(`Dumped RAM in ${(performance.now() - this.startTime) / 1000} seconds.`)
+      this.write(0x0000, 0x00)
+      await this.promise
+      this.resetPromise()
+      this.downloadRom()
+      this.readButtonDisabled = false
+    },
+    downloadRom (romData = this.readText) {
+      var byteArray = new Uint8Array(romData.length / 2)
       for (var x = 0; x < byteArray.length; x++) {
-        byteArray[x] = parseInt(this.readText.substr(x * 2, 2), 16)
+        byteArray[x] = parseInt(romData.substr(x * 2, 2), 16)
       }
 
       var data = new Blob([byteArray], {
@@ -237,7 +275,12 @@ export default {
         name = 'logo'
       }
       // if (document.getElementById('cgbSupportSelect').value == '00') {
-      a.download = name + '.gb'
+      if (this.readingSource === 'rom') {
+        a.download = name + '.gb'
+      } else {
+        a.download = name + '.sav'
+      }
+
       // } else {
       //   a.download = name + '.gbc'
       // }

@@ -106,66 +106,87 @@ export default (header) => {
   }
 
   var romSize = ''
+  var romSizeBytes = 0
   switch (header[20]) { // rom size
     case '00':
       romSize = '32 KByte'
+      romSizeBytes = 32768
       break
     case '01':
       romSize = '64 KByte'
+      romSizeBytes = 65536
       break
     case '02':
       romSize = '128 KByte'
+      romSizeBytes = 131072
       break
     case '03':
       romSize = '256 KByte'
+      romSizeBytes = 262144
       break
     case '04':
       romSize = '512 KByte'
+      romSizeBytes = 524288
       break
     case '05':
       romSize = '1 MByte'
+      romSizeBytes = 1048576
       break
     case '06':
       romSize = '2 MByte'
+      romSizeBytes = 2097152
       break
     case '07':
       romSize = '4 MByte'
+      romSizeBytes = 4194304
       break
     case '08':
       romSize = '8 MByte'
+      romSizeBytes = 8388608
       break
     case '52':
       romSize = '1.1 MByte'
+      romSizeBytes = 1153434
       break
     case '53':
       romSize = '1.2 MByte'
+      romSizeBytes = 1200
       break
     case '54':
       romSize = '1.5 MByte'
+      romSizeBytes = 1500
       break
   }
 
   var ramSize = ''
+  var ramSizeBytes = 0
   switch (header[21]) { // ram size
     case '00':
       ramSize = 'None'
+      ramSizeBytes = 0
       break
     case '01':
       ramSize = '2 KBytes'
+      ramSizeBytes = 2
       break
     case '02':
       ramSize = '8 Kbytes'
+      ramSizeBytes = 8
       break
     case '03':
       ramSize = '32 KBytes'
+      ramSizeBytes = 32
       break
     case '04':
       ramSize = '128 KBytes'
+      ramSizeBytes = 128
       break
     case '05':
       ramSize = '64 KBytes'
+      ramSizeBytes = 64
       break
   }
+  ramSizeBytes = ramSizeBytes * 1000
 
   var japan = false // destination code
   switch (header[22]) {
@@ -810,7 +831,9 @@ export default (header) => {
     title,
     cartType,
     romSize,
+    romSizeBytes,
     ramSize,
+    ramSizeBytes,
     japan,
     licensee,
     sgbSupport

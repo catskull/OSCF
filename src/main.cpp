@@ -11,26 +11,28 @@
 #define RST  PIN_PD3
 #define SND  PIN_PD2
 
-#define READSTART 'G'
-#define READEND   'H'
+#define READSTART  'G'
+#define READEND    'H'
+#define WRITESTART 'I'
+#define WRITEEND   'J'
 
 #include <Arduino.h>
 
+unsigned int address = 0;
+unsigned int readBytes = 0;
+byte dataByte = 0; 
+
 byte readData() {
-  portMode(DATA, INPUT);
+  // portMode(DATA, INPUT);
   return portRead(DATA);
 }
 
-void writeData(byte data) {
-  portMode(DATA, OUTPUT);
-  portWrite(DATA, data);
-}
-
-void writeAddress(short data) {
-  portMode(ADDR1, OUTPUT);
-  portMode(ADDR2, OUTPUT);
-  portWrite(ADDR1, data & 0xFF);
-  portWrite(ADDR2, (data >> 8) & 0xFF);
+void writeAddress(short address) {
+  // portMode(ADDR1, OUTPUT);
+  // portMode(ADDR2, OUTPUT);
+  portWrite(ADDR1, address & 0xFF);
+  portWrite(ADDR2, (address >> 8) & 0xFF);
+  digitalWrite(CS, (~(address >> 16) & 1));
 }
 
 void printHex(int num, int precision) {
@@ -43,6 +45,35 @@ void printHex(int num, int precision) {
   Serial.print(tmp);
 }
 
+void dumpData() {
+  // digitalWrite(RST, LOW);
+  // delay(10);
+  digitalWrite(WR, HIGH);
+  // digitalWrite(RST, HIGH);
+  digitalWrite(RD, LOW);
+  delay(10);
+  portMode(DATA, INPUT);
+  portMode(ADDR1, OUTPUT);
+  portMode(ADDR2, OUTPUT);
+  for (unsigned int n = address; n <= (address + readBytes); n++) {
+    writeAddress(n);
+    printHex(readData(), 2);
+  }
+  delay(10);
+  Serial.print(READEND);
+}
+
+void writeData() {
+  digitalWrite(WR, LOW);
+  digitalWrite(RD, HIGH);
+  delay(10);
+  portMode(ADDR1, OUTPUT);
+  portMode(ADDR2, OUTPUT);
+  portMode(DATA, OUTPUT);
+  writeAddress(address);
+  portWrite(DATA, dataByte);
+  Serial.print(WRITEEND);
+}
 
 void setup() {
   Serial.begin(115200);
@@ -60,14 +91,9 @@ void setup() {
   digitalWrite(RD, HIGH);
   digitalWrite(CS, HIGH);
   digitalWrite(RST, HIGH);
+  digitalWrite(SND, HIGH);
   Serial.println("Connected to OSCF v0.0.2\r\n");
 }
-
-bool flag = false;
-bool command;
-int count = 0;
-unsigned int readLocation = 0;
-unsigned int readBytes = 0;
 
 void loop() {
   if (Serial && Serial.available()) {
@@ -78,31 +104,22 @@ void loop() {
       while(Serial.available() < 2){}
       byte1 = Serial.read();
       byte2 = Serial.read();
-      readLocation = byte2 * 256 + byte1;
+      address = byte2 * 256 + byte1;
       while(Serial.available() < 2){}
       byte1 = Serial.read();
       byte2 = Serial.read();
       readBytes = byte2 * 256 + byte1;
-      command = true;
+      dumpData();
+    } else if (byte1 == WRITESTART) {
+      while(Serial.available() < 2){}
+      byte1 = Serial.read();
+      byte2 = Serial.read();
+      address = byte2 * 256 + byte1;
+      while(Serial.available() < 2){}
+      byte1 = Serial.read();
+      byte2 = Serial.read();
+      dataByte = byte1;
+      writeData();
     }
-  }
-
-  if (command) {
-    flag = false;
-    command = false;
-    count = 0;
-    digitalWrite(RST, LOW);
-    delay(10);
-    digitalWrite(WR, LOW);
-
-    digitalWrite(RST, HIGH);
-    digitalWrite(RD, LOW);
-    digitalWrite(CS, HIGH);
-    delay(10);
-    for (unsigned int n = readLocation; n < (readLocation + readBytes); n++) {
-      writeAddress(n);
-      printHex(readData(), 2);
-    }
-    Serial.print(READEND);
   }
 }
